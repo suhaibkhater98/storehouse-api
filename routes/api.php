@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\v1\CategoriesController;
 use App\Http\Controllers\v1\ProductsController;
+use App\Http\Controllers\v1\UsersController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,12 +17,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
+Route::post('users/register',[UsersController::class  , 'register'])->name('user.login');
+Route::post('users/login',[UsersController::class  , 'login'])->name('user.register');
 
-Route::prefix('v1')->group(function() {
+Route::middleware('auth:sanctum')->group(function() {
     Route::apiResource('categories' , CategoriesController::class);
     Route::apiResource('products' , ProductsController::class);
+    Route::apiResource('users' , ProductsController::class);
+    Route::post('users/logout',[UsersController::class  , 'logout'])->name('user.logout');;
 });

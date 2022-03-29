@@ -18,6 +18,7 @@ class ProductResource extends JsonResource
     {
         $user_name = User::find($this->user_id)->name;
         return [
+            'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
             'quantity' => $this->quantity,
