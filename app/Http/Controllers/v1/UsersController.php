@@ -5,7 +5,6 @@ namespace App\Http\Controllers\v1;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\LoginUserRequest;
-use App\Models\Product;
 use App\Models\User;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\UserResource;
@@ -107,20 +106,25 @@ class UsersController extends Controller
 
         $cookie = cookie('jwt' , $token , 60 * 24);
 
-        return response([
-            'message' => "Success",
-            'user' => new UserResource($user)
-        ])->withCookie($cookie);
+        if($cookie) {
+            return response([
+                'message' => "Success",
+                'user' => new UserResource($user)
+            ])->withCookie($cookie);
+        } else {
+            return response(['success' => 0 , "message" => 'Ops']);
+        }
     }
 
     public function logout(Request $request){
-        $this->guard()->logout();
-        $request->session()->invalidate();
-        $cookie[0] = Cookie::forget('jwt');
-        $cookie[1] = Cookie::forget('XSRF-TOKEN');
+        // delete all tokens, essentially logging the user out
+        Auth::user()->tokens()->delete();
+
+        $cookie = Cookie::forget('jwt');
+
         return response([
             'message' => 'Logout successfully'
-        ])->withCookies($cookie);
+        ])->withCookie($cookie);
     }
 
     public function register(StoreUserRequest $request)

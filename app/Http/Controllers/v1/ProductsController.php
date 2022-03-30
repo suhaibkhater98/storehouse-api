@@ -4,7 +4,6 @@ namespace App\Http\Controllers\v1;
 
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use App\Models\Category;
 use App\Models\Product;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\ProductResource;
@@ -13,8 +12,6 @@ use App\Models\ProductsCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Fileupload;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\URL;
 
 class ProductsController extends Controller
 {
