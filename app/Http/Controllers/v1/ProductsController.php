@@ -8,6 +8,9 @@ use App\Models\Product;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\ProductResource;
 use App\Http\Resources\v1\ProductCollection;
+use App\Models\ProductsCategory;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 
 class ProductsController extends Controller
@@ -15,34 +18,75 @@ class ProductsController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return ProductCollection
      */
     public function index()
     {
-        return new ProductCollection(Product::paginate());
+        return new ProductCollection(Product::orderBy('updated_at' , 'desc')->paginate());
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\StoreProductRequest  $request
-     * @return \Illuminate\Http\Response
+     * @return ProductResource
      */
     public function store(StoreProductRequest $request)
     {
-        $category = Product::create($request->all());
-        return new ProductResource($category);
+        $product = Product::create([
+            'user_id' => Auth::id(),
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'quantity' => $request->quantity
+        ]);
+        if($product && !empty($request->categories)){
+            $data = [];
+            foreach ($request->categories as $id){
+                $data[] = [
+                    'category_id' => $id,
+                    'product_id' => $product->id
+                ];
+            }
+            ProductsCategory::insert($data);
+        }
+        return new ProductResource($product);
     }
 
     /**
      * Display the specified resource.
      *
      * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
+     * @return ProductResource|false|string
      */
     public function show(Product $product)
     {
-        return new ProductResource($product);
+        if($product){
+            //$category_ids = collect(DB::table("products_categories")->where('product_id','=',$product->id)->select('category_id' , '')->get())->pluck('category_id');
+            $product = $product->with(['categories'])->where('id' , '=',$product->id)->first();
+            //return $product;
+            $multiplied = [];
+            foreach ($product->categories as $value){
+                $multiplied[] = [
+                    'value' => $value['id'],
+                    'label' => $value['name']
+                ];
+            }
+            return json_encode([
+                'success' => 1,
+                'data' => [
+                    "id" => $product->id,
+                    "name" => $product->name,
+                    'description' => $product->description,
+                    'price' => $product->price,
+                    'quantity' => $product->quantity,
+                    'created_at' => date('Y-m-d h:i:s' , strtotime($product->created_at)),
+                    'category_ids' => $multiplied,
+                ]
+            ]);
+        }
+
+        return json_encode(['success' => 0 , 'message' => 'Ops There are no data']);
     }
 
     /**
@@ -50,11 +94,30 @@ class ProductsController extends Controller
      *
      * @param  \App\Http\Requests\UpdateProductRequest  $request
      * @param  \App\Models\Product  $product
-     * @return \Illuminate\Http\Response
+     * @return ProductResource
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        $product->update($request->all());
+        $product->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'quantity' => $request->quantity
+        ]);
+        ProductsCategory::where('product_id' , $product->id)->delete();
+        if(!empty($request->categories)){
+            $data = [];
+            foreach ($request->categories as $value){
+                $data[] = [
+                    'category_id' => $value['value'],
+                    'product_id' => $product->id,
+                    'created_at' => date('Y-m-d h:i:s'),
+                    'updated_at' => date('Y-m-d h:i:s'),
+                ];
+            }
+            ProductsCategory::insert($data);
+        }
+
         return new ProductResource($product);
     }
 
@@ -67,6 +130,23 @@ class ProductsController extends Controller
     public function destroy(Product $product)
     {
         if($product->delete())
-            return response('Deleted Successfully', 204);
+            return response(['success' => 1,'message' => 'Deleted Successfully'], 200);
+    }
+
+    /**
+     * @param Product $product
+     * @return \Illuminate\Http\Response
+     */
+    public function decQuantity(Request $request){
+        $product = Product::find($request->id);
+        if($product->quantity > 0){
+            if($product->update(['quantity' => intval($product->quantity - 1)])){
+                return response(['success' => 1 , 'message' => 'The product has been decreased successfully'] , 200);
+            } else {
+                return response(['success' => 0 , 'message' => 'The product has not deleted'] , 200);
+            }
+        } else {
+            return response(['success' => 0 , 'message' => 'The product has no Quantity to decrease'] , 200);
+        }
     }
 }

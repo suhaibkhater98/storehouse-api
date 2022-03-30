@@ -8,17 +8,22 @@ use App\Models\Category;
 use App\Http\Resources\v1\CategoryResource;
 use App\Http\Resources\v1\CategoryCollection;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CategoriesController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return CategoryCollection
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new CategoryCollection(Category::paginate());
+        if($request->withPagination)
+            return new CategoryCollection(Category::paginate());
+        else
+            return new CategoryCollection(Category::all());
     }
 
     /**
@@ -65,7 +70,16 @@ class CategoriesController extends Controller
      */
     public function destroy(Category $category)
     {
+        $products = DB::table('products_categories')
+            ->where('category_id', '=', $category->id)
+            ->select('id')->get()->toArray();
+        if(count($products) > 0)
+            return response(['success' => 0 , 'message' => 'Ops This Category have products'] , \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+
         if($category->delete())
-            return response('Deleted Successfully', 204);
+            return response(['success' => 1 , 'message' => 'Deleted Successfully'], \Symfony\Component\HttpFoundation\Response::HTTP_OK);
+
+        return response('Something went Wrong' , \Symfony\Component\HttpFoundation\Response::HTTP_NOT_ACCEPTABLE);
     }
+
 }

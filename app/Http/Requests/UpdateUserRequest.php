@@ -23,18 +23,17 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            "name" => "required|string|max:255",
-            "email" => "required|email|max:255|unique:users,email,".$this->user()->id,
-            "password" => [
-                'required',
+        $data['name'] = "required|string|max:255";
+        if($this->request->has('password') && !empty($this->request->get('password'))){
+            $data['password'] = [
                 'string',
                 'max:255',
                 'min:8',             // must be at least 10 characters in length
                 'regex:/[a-z]/',      // must contain at least one lowercase letter
                 'regex:/[A-Z]/',      // must contain at least one uppercase letter
                 'regex:/[0-9]/',      // must contain at least one digit
-            ]
-        ];
+            ];
+        }
+        return $data;
     }
 }

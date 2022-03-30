@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\v1\CategoriesController;
+use App\Http\Controllers\v1\DashboardsController;
 use App\Http\Controllers\v1\ProductsController;
 use App\Http\Controllers\v1\UsersController;
 use Illuminate\Http\Request;
@@ -24,6 +25,10 @@ Route::post('users/login',[UsersController::class  , 'login'])->name('user.regis
 Route::middleware('auth:sanctum')->group(function() {
     Route::apiResource('categories' , CategoriesController::class);
     Route::apiResource('products' , ProductsController::class);
-    Route::apiResource('users' , ProductsController::class);
+    Route::apiResource('users' , UsersController::class);
+
+    Route::post('products/decQuantity' , [ProductsController::class , 'decQuantity'])->name('decrease.product');
     Route::post('users/logout',[UsersController::class  , 'logout'])->name('user.logout');;
+
+    Route::get('dashboards/getCountTotal' , [DashboardsController::class , 'getCountTotal'])->name('get.total');
 });

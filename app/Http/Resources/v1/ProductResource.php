@@ -2,8 +2,10 @@
 
 namespace App\Http\Resources\v1;
 
+use App\Models\ProductsCategory;
 use Illuminate\Http\Resources\Json\JsonResource;
 use \App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 
 class ProductResource extends JsonResource
@@ -16,16 +18,15 @@ class ProductResource extends JsonResource
      */
     public function toArray($request)
     {
-        $user_name = User::find($this->user_id)->name;
         return [
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
             'quantity' => $this->quantity,
             'price' => $this->price,
-            'user_namr' => $user_name,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'user_name' => User::find($this->user_id)->name ?? '',
+            'created_at' => date('Y-m-d h:i:s' , strtotime($this->created_at)),
+            'updated_at' => date('Y-m-d h:i:s' , strtotime($this->updated_at)),
         ];
     }
 }
