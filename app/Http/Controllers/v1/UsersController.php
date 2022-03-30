@@ -106,14 +106,12 @@ class UsersController extends Controller
 
         $cookie = cookie('jwt' , $token , 60 * 24);
 
-        if($cookie) {
-            return response([
-                'message' => "Success",
-                'user' => new UserResource($user)
-            ])->withCookie($cookie);
-        } else {
-            return response(['success' => 0 , "message" => 'Ops']);
-        }
+
+        return response([
+            'message' => "Success",
+            'user' => new UserResource($user)
+        ])->withCookie($cookie);
+
     }
 
     public function logout(Request $request){
