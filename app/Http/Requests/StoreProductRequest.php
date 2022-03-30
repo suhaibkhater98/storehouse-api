@@ -23,10 +23,16 @@ class StoreProductRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+
+        $data = [
             'name' => 'required|max:50',
             'description' => 'required|max:255',
             'user_id' => 'exists:\App\Models\User,id'
         ];
+
+        if($this->request->has('image') && !empty($this->request->get('image')))
+            $data['image'] = 'image|mimes:jpg,png,jpeg,gif,svg|max:2048';
+
+        return $data;
     }
 }

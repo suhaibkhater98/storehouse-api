@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1;
 
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\Category;
 use App\Models\Product;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\ProductResource;
@@ -11,7 +12,9 @@ use App\Http\Resources\v1\ProductCollection;
 use App\Models\ProductsCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Fileupload;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class ProductsController extends Controller
 {
@@ -42,13 +45,19 @@ class ProductsController extends Controller
         ]);
         if($product && !empty($request->categories)){
             $data = [];
-            foreach ($request->categories as $id){
+            $category = explode("," , $request->categories);
+            foreach ($category as $id){
                 $data[] = [
                     'category_id' => $id,
                     'product_id' => $product->id
                 ];
             }
             ProductsCategory::insert($data);
+        }
+        if($product && !empty($request->image)){
+            $name = $product->id . '.'. $request->file('image')->extension();
+            $request->file('image')->storeAs('public/images' , $name);
+            Product::where('id',$product->id)->update(['image' => $name]);
         }
         return new ProductResource($product);
     }
@@ -72,6 +81,9 @@ class ProductsController extends Controller
                     'label' => $value['name']
                 ];
             }
+            if($product->image != null){
+                $image =  asset('storage/images/'.$product->image);
+            }
             return json_encode([
                 'success' => 1,
                 'data' => [
@@ -82,6 +94,7 @@ class ProductsController extends Controller
                     'quantity' => $product->quantity,
                     'created_at' => date('Y-m-d h:i:s' , strtotime($product->created_at)),
                     'category_ids' => $multiplied,
+                    'image' => $image ?? null
                 ]
             ]);
         }

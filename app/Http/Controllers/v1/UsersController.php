@@ -32,7 +32,7 @@ class UsersController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\StoreUserRequest  $request
-     * @return UserResource
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreUserRequest $request)
     {
@@ -41,7 +41,7 @@ class UsersController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password)
         ]);
-        return new UserResource($user);
+        return response()->json(['success' => 1 , 'data' => new UserResource($user)]);
     }
 
     /**
@@ -113,11 +113,14 @@ class UsersController extends Controller
         ])->withCookie($cookie);
     }
 
-    public function logout(){
-        $cookie = Cookie::forget('jwt');
+    public function logout(Request $request){
+        $this->guard()->logout();
+        $request->session()->invalidate();
+        $cookie[0] = Cookie::forget('jwt');
+        $cookie[1] = Cookie::forget('XSRF-TOKEN');
         return response([
             'message' => 'Logout successfully'
-        ])->withCookie($cookie);
+        ])->withCookies($cookie);
     }
 
     public function register(StoreUserRequest $request)

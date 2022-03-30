@@ -2,7 +2,11 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\ValidationException;
+
 
 class StoreUserRequest extends FormRequest
 {
@@ -42,5 +46,17 @@ class StoreUserRequest extends FormRequest
         return [
             'password.regex' => 'Password must contain at least one uppercase and one lowercase letters.'
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        if ($this->expectsJson()) {
+            $errors = (new ValidationException($validator))->errors();
+            throw new HttpResponseException(
+                response()->json(['data' => $errors , 'success' => 0], 202)
+            );
+        }
+
+        parent::failedValidation($validator);
     }
 }
