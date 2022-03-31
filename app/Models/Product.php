@@ -11,6 +11,8 @@ class Product extends Model
 {
     use HasFactory , SoftDeletes;
 
+    protected $dateFormat = "Y-m-d h:i:s";
+
     protected $fillable = [ 'name' , 'description' , 'quantity' , 'price' , 'image' , 'user_id' ];
 
     public function user() {

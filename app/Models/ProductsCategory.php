@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class ProductsCategory extends Model
 {
     use HasFactory;
+
+    protected $dateFormat = "Y-m-d h:i:s";
 }

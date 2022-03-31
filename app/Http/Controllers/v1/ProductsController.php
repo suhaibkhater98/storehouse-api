@@ -20,8 +20,22 @@ class ProductsController extends Controller
      *
      * @return ProductCollection
      */
-    public function index()
+    public function index(Request $request)
     {
+        if(isset($request->withOutPagination) && $request->withOutPagination) {
+            $products = Product::select('created_at', 'id')->get();
+
+            $collection = collect($products);
+
+            $collection = $collection->map(function ($item) {
+                return [ 'date' => date('Y-m-d' , strtotime($item['created_at'])) , 'id' => $item['id']];
+            });
+
+            $count = $collection->groupBy('date')->map->count();
+
+            return json_encode(['success' => 1 , 'data' => $count]);
+        }
+
         return new ProductCollection(Product::orderBy('updated_at' , 'desc')->paginate());
     }
 
@@ -37,8 +51,8 @@ class ProductsController extends Controller
             'user_id' => Auth::id(),
             'name' => $request->name,
             'description' => $request->description,
-            'price' => $request->price,
-            'quantity' => $request->quantity
+            'price' => $request->price ?? 1,
+            'quantity' => $request->quantity ?? 1
         ]);
         if($product && !empty($request->categories)){
             $data = [];
@@ -141,6 +155,8 @@ class ProductsController extends Controller
     {
         if($product->delete())
             return response(['success' => 1,'message' => 'Deleted Successfully'], 200);
+        else
+            return response(['success' => 0,'message' => 'Deleted Successfully']);
     }
 
     /**

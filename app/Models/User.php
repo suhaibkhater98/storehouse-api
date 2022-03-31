@@ -43,6 +43,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    protected $dateFormat = "Y-m-d h:i:s";
+
     public function products() {
         return $this->hasMany('App\Models\Product', 'user_id' , 'id');
     }

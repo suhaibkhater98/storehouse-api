@@ -9,6 +9,8 @@ class TotalArchive extends Model
 {
     use HasFactory;
 
+    protected $dateFormat = "Y-m-d h:i:s";
+
     protected $fillable = [
         'total_categories',
         'total_products',

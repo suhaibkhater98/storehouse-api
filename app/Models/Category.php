@@ -11,6 +11,8 @@ class Category extends Model
     use HasFactory , SoftDeletes;
 
 
+    protected $dateFormat = "Y-m-d h:i:s";
+
     protected $fillable = ['name'];
 
     public function products() {
