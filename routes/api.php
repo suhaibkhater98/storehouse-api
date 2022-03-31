@@ -4,7 +4,7 @@ use App\Http\Controllers\v1\CategoriesController;
 use App\Http\Controllers\v1\DashboardsController;
 use App\Http\Controllers\v1\ProductsController;
 use App\Http\Controllers\v1\UsersController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\v1\NewPasswordController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,7 +21,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('users/register',[UsersController::class  , 'register'])->name('user.login');
 Route::post('users/login',[UsersController::class  , 'login'])->name('user.register');
-
+Route::post('forgot-password', [NewPasswordController::class, 'forgotPassword']);
+Route::post('reset-password', [NewPasswordController::class, 'reset']);
 Route::middleware('auth:sanctum')->group(function() {
     Route::apiResource('categories' , CategoriesController::class);
     Route::apiResource('products' , ProductsController::class);
