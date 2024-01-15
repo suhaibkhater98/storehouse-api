@@ -3,8 +3,8 @@
 Clone the repo locally:
 
 ```sh
-git clone https://github.com/suhaibkhater98/sager-app-api.git
-cd sager-app-api
+git@github.com:suhaibkhater98/storehouse-api.git
+cd storehouse-api
 ```
 
 Install PHP dependencies:
